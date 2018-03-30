@@ -1,0 +1,32 @@
+<%= form_with(model: for, local: true) do |form| %>
+  <% if for.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(for.errors.count, "error") %> prohibited this for from being saved:</h2>
+
+      <ul>
+      <% for.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :Developer %>
+    <%= form.text_field :Developer, id: :for_Developer %>
+  </div>
+
+  <div class="field">
+    <%= form.label :null %>
+    <%= form.text_field :null, id: :for_null %>
+  </div>
+
+  <div class="field">
+    <%= form.label :unique %>
+    <%= form.text_field :unique, id: :for_unique %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>
