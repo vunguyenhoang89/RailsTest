@@ -4,8 +4,8 @@
 <br>
 <%= form_for @search_form, url: developers_path, method: :get do |f| %>
   Email : <%= f.text_field :email %>
-  Programming Languages : <%= f.text_field :prog_lang %>
   Language Code : <%= f.text_field :language_code %>
+  Programming Languages : <%= f.text_field :prog_lang %>
   <%= f.submit "Search" %>
 <% end %>
 <br>
@@ -13,7 +13,9 @@
   <thead>
     <tr>
       <th>Email</th>
+      <th>Languages</th>
       <th>Programming Languages</th>
+      <th>Config</th>
     </tr>
   </thead>
 
@@ -22,15 +24,20 @@
     <% @developers.each do |developer| %>
       <tr>
         <td><%= developer.email %></td>
-        <% developer.programming_languages.each do |pro_lang| %>
-          <td> <%= pro_lang.name %></td>
-        <% end %>
-        <% developer.languages.each do |language_code| %>
-          <td> <%= language_code.code %></td>
-        <% end %>
-        <td><%= link_to 'Show', developer %></td>
-        <td><%= link_to 'Edit', edit_developer_path(developer) %></td>
-        <td><%= link_to 'Destroy', developer, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+        <td>
+          <% developer.languages.each do |language_code| %>
+            <%= language_code.code %>
+          <% end %>
+        </td>
+        <td>
+          <% developer.programming_languages.each do |pro_lang| %>
+            <%= pro_lang.name %>
+          <% end %>
+        </td>
+        <td><%= link_to 'Show', developer %>
+          <%= link_to 'Edit', edit_developer_path(developer) %>
+          <%= link_to 'Destroy', developer, method: :delete, data: {confirm: 'Are you sure?'} %>
+        </td>
       </tr>
     <% end %>
     <% else %>

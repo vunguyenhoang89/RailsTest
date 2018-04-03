@@ -1,52 +1,66 @@
-# frozen_string_literal: true
-
 require 'rails_helper'
-
-RSpec.describe AdvancedSearchForm do
+RSpec.describe DeveloperSearchForm do
   describe '#search' do
-    context 'with no params' do
-      it 'returns no posts' do
-        create_list(:post, 2)
+    before do
+      @developer_1 = create(:developer, email: 'demo1@gmail.com')
+      @programming_language_1 = create(:programming_language, name: 'PHP')
+      @language = create(:language, code: 'en')
+      @developer_2 = create(:developer, email: 'test1@gmail.com')
+      @programming_language_2 = create(:programming_language, name: 'Ruby')
+      create(:developer_programming_language, developer_id: @developer_1.id, programming_language_id: @programming_language_1.id)
+      create(:developer_programming_language, developer_id: @developer_2.id, programming_language_id: @programming_language_2.id)
+      create(:developer_language,developer_id: @developer_1.id, language_id: @language.id)
+      create(:developer_language,developer_id: @developer_2.id, language_id: @language.id)
+    end
 
-        form = AdvancedSearchForm.new({})
+    context 'search with empty params' do
+      it 'returns empty list' do
+        form = DeveloperSearchForm.new
         expect(form.search.size).to eq(0)
       end
     end
 
-    context 'with from param' do
-      it 'returns posts by screen_name' do
-        user = create(:user, screen_name: 'foo', posts_count: 2)
-        create(:user, posts_count: 1)
+    context 'Test for programming_language' do
+      it 'Language programming that exists in database' do
+        form = DeveloperSearchForm.new(prog_lang: 'php')
+        expect(form.search.size).to eq(1)
+      end
 
-        form = AdvancedSearchForm.new(posts: { from: user.screen_name })
+      it 'Language programming that does not exist in database' do
+        form = DeveloperSearchForm.new(prog_lang: 'ruby')
+        expect(form.search.size).to eq(0)
+      end
+    end
+
+    context 'Test search for developer' do
+      it 'Email exists in database' do
+        form = DeveloperSearchForm.new(email: 'demo1@gmail.com')
+        expect(form.search.size).to eq(1)
+      end
+
+      it 'Email does not exists in DB' do
+        form = DeveloperSearchForm.new(email: 'abc123@gmail.com')
+        expect(form.search.size).to eq(0)
+      end
+    end
+
+    context 'Test for searching developer with programming language and language' do
+
+      it 'Search for en' do
+        form = DeveloperSearchForm.new(language_code: 'en')
         expect(form.search.size).to eq(2)
-        expect(form.search.all? { |p| p.user == user }).to be_truthy
+      end
+
+      it 'Search for Ruby - en' do
+        form = DeveloperSearchForm.new(prog_lang: 'Ruby', language_code: 'en')
+        expect(form.search.size).to eq(1)
+      end
+
+      it 'Search for PHP - en' do
+        form = DeveloperSearchForm.new(prog_lang: 'PHP', language_code: 'en')
+        expect(form.search.size).to eq(1)
       end
     end
 
-    context 'with since param' do
-      it 'returns posts whose created_at are on or after the since param' do
-        Timecop.freeze(Time.current) do
-          (1..3).each { |num| create(:post, created_at: num.days.ago) }
-
-          form = AdvancedSearchForm.new(posts: { since: 2.days.ago.strftime('%Y%m%d') })
-          expect(form.search.size).to eq(2)
-          # This spec fails on circle ci, so added 10.seconds for margin.
-          expect(form.search.all? { |p| p.created_at >= (2.days.ago - 10.seconds) }).to be_truthy
-        end
-      end
-    end
-
-    context 'with till param' do
-      it 'returns posts whose created_at are on or before the till param' do
-        Timecop.freeze(Time.current) do
-          (1..3).each { |num| create(:post, created_at: num.days.ago) }
-
-          form = AdvancedSearchForm.new(posts: { till: 2.days.ago.strftime('%Y%m%d') })
-          expect(form.search.size).to eq(2)
-          expect(form.search.all? { |p| p.created_at <= 2.days.ago }).to be_truthy
-        end
-      end
-    end
   end
 end
